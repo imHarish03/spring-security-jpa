@@ -2,27 +2,35 @@ package lab.demo.spring.security.jpa.configuration;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class MyUser implements UserDetails {
+import lab.demo.spring.security.jpa.model.User;
+
+public class MyUserContext implements UserDetails {
 
 	private String userName;
+	private String password;
+	private Collection<? extends GrantedAuthority> authorities;
 
-	public MyUser(String userName) {
-		this.userName = userName;
+	public MyUserContext(User user) {
+		this.userName = user.getUserName();
+		this.password = user.getPassword();
+		this.authorities = Arrays.stream(user.getRoles().split(",")).map(SimpleGrantedAuthority::new)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Arrays.asList(new SimpleGrantedAuthority("ADMIN"));
+		return authorities;
 	}
 
 	@Override
 	public String getPassword() {
-		return "pass";
+		return password;
 	}
 
 	@Override
